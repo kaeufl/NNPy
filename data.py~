@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+def trim(x):
+  """remove leading and trailing zeros common to all training data"""
+  for col in range(x.shape[1]):
+    if find(x[:,col]):
+      break
+  
