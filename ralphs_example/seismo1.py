@@ -4,6 +4,7 @@ from mdn import MDN
 from nnplot import plotModelVsTrue, plotPostMap
 import nndata
 import matplotlib.pyplot as plt
+import os
 
 np.seterr(invalid='raise')
 #np.random.seed(42)
@@ -34,7 +35,7 @@ N = 699
 nd = 50
 
 H = 10
-M = 4
+M = 1
 nit = 300
 
 params = {0:'$\\rho$ lower',
@@ -52,11 +53,11 @@ t = np.zeros([N, 6])
 d_test = np.zeros([N_max-N, 1600])
 t_test = np.zeros([N_max-N, 6])
 for n in range(N):
-  d[n] = np.fromfile('ralphs_example/training/setup_1/model_' + str(n+1) + '/Uz_file_double.bin')
-  t[n] = np.loadtxt('ralphs_example/training/setup_1/model_' + str(n+1) + '/model_par.txt')
+  d[n] = np.fromfile(os.getcwd() + '/training/setup_1/model_' + str(n+1) + '/Uz_file_double.bin')
+  t[n] = np.loadtxt(os.getcwd() + '/training/setup_1/model_' + str(n+1) + '/model_par.txt')
 for n in range(N_max - N):
-  d_test[n] = np.fromfile('ralphs_example/training/setup_1/model_' + str(N+n+1) + '/Uz_file_double.bin')
-  t_test[n] = np.loadtxt('ralphs_example/training/setup_1/model_' + str(N+n+1) + '/model_par.txt')
+  d_test[n] = np.fromfile(os.getcwd() + '/training/setup_1/model_' + str(N+n+1) + '/Uz_file_double.bin')
+  t_test[n] = np.loadtxt(os.getcwd() + '/training/setup_1/model_' + str(N+n+1) + '/model_par.txt')
 
 
 ##############################################

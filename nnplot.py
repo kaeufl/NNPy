@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.mlab import find
+from matplotlib import mlab
 
 def plotPost2D(mdn, y, 
                 rangex = [0, 1], rangey = [0, 1], 
@@ -71,7 +71,6 @@ def plotPostCond(mdn, x, t):
               #levels = [0, 1.0/np.exp(1)]
              #)
 
-
 def plotPostMap(mdn, x, t):
   y = mdn.forward(x)
   alpha, sigma, mu = mdn.getMixtureParams(y)
@@ -79,7 +78,7 @@ def plotPostMap(mdn, x, t):
   
   
              
-def plotModelVsTrue(mdn, y, t, thres = 0.7):
+def plotModelVsTrue(mdn, y, t, thres = 0.7, dim = 0):
   alpha, sigma, mu = mdn.getMixtureParams(y)
   # find most important kernels
   
@@ -96,7 +95,7 @@ def plotModelVsTrue(mdn, y, t, thres = 0.7):
   if np.any(alpha_max <= thres):
     print 'Warning, not all mixture coefficients are above threshold.'
   
-  plt.scatter(mu_max[:,0], t)
+  plt.scatter(mu_max[:,dim], t)
   plt.xlim([min(t), max(t)])
   plt.ylim([min(t), max(t)])
   plt.xlabel('prediction')

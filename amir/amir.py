@@ -34,10 +34,12 @@ def calc_T(x, m):
   
 # generate training and test set
 m_test = np.zeros([N, 4])
-m_test[:, 0] = np.random.uniform(-20, 20, size = N)
-m_test[:, 1] = np.random.uniform(-20, 20, size = N)
-m_test[:, 2] = 5.0 # np.random.uniform(0, 15, size = N)
-m_test[:, 3] = 5.0 # np.random.uniform(1, 10, size = N)
+#m_test[:, 0] = np.random.uniform(-20, 20, size = N) # source coodrinates
+#m_test[:, 1] = np.random.uniform(-20, 20, size = N)
+m_test[:, 0] = np.random.normal(15.0, size = N) # source coodrinates
+m_test[:, 1] = np.random.normal(5.0, size = N)
+m_test[:, 2] = 5.0
+m_test[:, 3] = 5.0 # velocity
 
 d_test = np.zeros([N, st.shape[0]])
 for n in range(N):
@@ -48,7 +50,7 @@ for n in range(N):
 #d_test = d_test + eps
 
 # preprocess
-d_test = nndata.whiten(d_test, False)
+#d_test = nndata.whiten(d_test, False)
 #d_test = nndata.rescale(d_test)
 
 m_train = m_test[0:.7*N]
@@ -56,11 +58,35 @@ m_test = m_test[.7*N:]
 d_train = d_test[0:.7*N]
 d_test = d_test[.7*N:]
 
-# train on X and Y
 mdn = MDN(H = 10, d = 6, ny = 2, M = 3)
-mdn.init_weights(m_train[:, 0:2], 1e3, scaled_prior = True)
+
+# train on X and Y
+plt.figure()
+
+plt.subplot(2,2,1)
+plt.hist(m_test[:,0])
+plt.title("Distribution of target data (source x)")
+
+plt.subplot(2,2,2)
+plt.hist(m_test[:,1])
+plt.title("Distribution of target data (source y)")
+
+plt.subplot(2,2,3)
+y = mdn.forward(d_test)
+nnplot.plotPost2D(mdn, y[0], [min(m_test[:,0]), max(m_test[:,0])],[min(m_test[:,1]), max(m_test[:,1])] )
+plt.title("Network output before initialization")
+
+mdn.init_weights(m_train[:, 0:2], 1e7, scaled_prior = False)
+
+plt.subplot(2,2,4)
+y = mdn.forward(d_test)
+nnplot.plotPost2D(mdn, y[0],[min(m_test[:,0]), max(m_test[:,0])],[min(m_test[:,1]), max(m_test[:,1])])
+plt.title("Network output after initialization")
+plt.suptitle("investigating the network initialization")
+
 mdn.train_BFGS(d_train, m_train[:,0:2], 1e-5, 500, constrained = False)
 
+plt.figure()
 plt.subplot(2,2,1)
 y = mdn.forward(d_test)
 nnplot.plotModelVsTrue(mdn, y, m_test[:,0], dim = 0)
@@ -73,7 +99,7 @@ plt.title('Y')
 # invert observations
 plt.subplot(2,2,3)
 d_obs = nndata.whiten(d_obs, False)
-y = mdn.forward(d_obs) 
+y = mdn.forward(d_obs)
 
 nnplot.plotPost2D(mdn, y[0,:], 
                   rangex = [-20, 20], rangey = [-20, 20], 

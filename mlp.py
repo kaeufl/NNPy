@@ -242,7 +242,6 @@ class TLP:
       #t0=datetime.now()
       w1 = w[:self.Nw1].reshape([self.w1.shape[0],self.w1.shape[1]])
       w2 = w[self.Nw1:].reshape([self.w2.shape[0],self.w2.shape[1]])
-      E = 0
       y = self._tlp(x, w1, w2)
       E = np.sum(self.En(y, t, w1, w2))
       self.E.append(E)

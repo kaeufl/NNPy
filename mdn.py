@@ -20,7 +20,7 @@ class MDN(TLP):
     
   def init_weights(self, t, prior, scaled_prior = False):
     """
-    initialze weights and biases so that the network models the unconditional density 
+    initialize weights and biases so that the network models the unconditional density 
     of the target data p(t)
     t: target data
     prior: 1/sigma^2
@@ -42,8 +42,8 @@ class MDN(TLP):
       sigma1 = 1.0/np.sqrt(prior)
       sigma2 = sigma1
       
-    self.w1 = np.random.normal(loc=0.0, scale = 1,size=[self.H, self.d+1])*sigma1 # 1st layer weights + bias
-    self.w2 = np.random.normal(loc=0.0, scale = 1,size=[self.ny, self.H+1])*sigma2 # 2nd layer weights + bias
+    self.w1 = np.random.normal(loc=0.0, scale = 1,size=[self.H, self.d+1]) * sigma1 # 1st layer weights + bias
+    self.w2 = np.random.normal(loc=0.0, scale = 1,size=[self.ny, self.H+1]) * sigma2 # 2nd layer weights + bias
     
     # init biases (taken from netlab, gmminit.m)
     [centroid, label] = kmeans2(t, self.M)
@@ -63,7 +63,7 @@ class MDN(TLP):
     self.w2[2*self.M:,0] = np.reshape(centroid, [self.M * self.c])
   
   def getMixtureParams(self, y):
-    """Returns the parameters of the gaussian mixture."""
+    """Returns the parameters of the Gaussian mixture."""
     if len(y.shape) == 1:
       # avoid underrun
       alpha = np.maximum(y[0:self.M], np.finfo(float).eps)
@@ -85,7 +85,6 @@ class MDN(TLP):
     
   def E_mdn(self, y, t, w1, w2):
     """mdn error function"""
-    M = int(self.M)
     alpha, sigma, mu = self.getMixtureParams(y.T)
     #T = np.tile(t.T, [M,1,1])
     phi = self._phi(t.T[None, : :], mu, sigma)
@@ -106,8 +105,8 @@ class MDN(TLP):
     T = t.T[None, :]
     
     phi = self._phi(T, mu, sigma)
-    
-    pi = alpha * phi / np.sum(alpha * phi, 0)
+    aphi = alpha*phi
+    pi = aphi / np.sum(aphi, 0)
     
     # derivatives of E with respect to the output variables (s. Bishop 1995, chp. 6.4)
     dE_dy_alpha = alpha - pi
