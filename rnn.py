@@ -4,7 +4,7 @@ from mlp import TLP
 class RNN(TLP):
     def __init__(self, H = 3, d = 1, ny = 1, T = 100):
         """
-        Create a fully-connected neural network with one hidden recurrent layer and a one dimensional input layer.
+        Create a fully-connected neural network with one hidden recurrent layer .
         @param H: number of hidden units
         @param ny: number of output units
         @param T: number of time-steps
