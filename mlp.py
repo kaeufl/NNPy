@@ -43,6 +43,13 @@ class TLP:
         """activation function"""
         return np.tanh(a)
     
+    def dg(self, a = None, ga = None):
+        """derivative of activation function"""
+        if a:
+            return 1 - self.g(a)**2
+        else:
+            return 1 - ga**2
+    
     def En(self, y, t):
         """error function"""
         pass
