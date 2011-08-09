@@ -62,16 +62,18 @@ class TLP:
         """Hessian of error function"""
         pass
     
-    def E_sum_of_squares(self, y, t, w1 = None, w2 = None):
+    def E_sum_of_squares(self, y, t, *w):
         """Sum-of-squares error function"""
-        return 0.5 * np.sum((y - t.T)**2, 0)
+        #return 0.5 * np.sum((y - t.T)**2, 0)
+        return 0.5 * np.sum((y - t)**2, 0)
         
-    def dE_sum_of_squares(self, x, y, t, w1 = None, w2 = None):
+    def dE_sum_of_squares(self, x, y, t, *w):
         """Derivatives of sum-of-squares error function"""
-        if w2 == None:
-            w2 = self.w2
-        dk = y - t.T
-        return self.backward(x, dk, w2)
+        #if w2 == None:
+        #    w2 = self.w2
+        # dk = y - t.T
+        dk = y - t
+        return self.backward(x, dk, *w)
         
     def HE_sum_of_squares(self, x, y, t, w1 = None, w2 = None):
         """Returns the Hessian of the error function with respect to the weights"""
@@ -132,7 +134,7 @@ class TLP:
     def deriv(self, x):
         """Return the derivative of the network outputs with respect to the weights evaluated at w"""
         # do a forward propagation to update the z
-        y = self._tlp(x)
+        y = self._forward(x)
         dydw1 = np.zeros([x.shape[0], self.ny, self.w1.shape[0], self.w1.shape[1]])
         dydw2 = np.zeros([x.shape[0], self.ny, self.w2.shape[0], self.w2.shape[1]])
         
@@ -151,7 +153,7 @@ class TLP:
         x = np.maximum(minval, x)
         return np.exp(x) / np.sum(np.exp(x), axis = 0)
     
-    def _tlp(self, x, w1 = None, w2 = None):
+    def _forward(self, x, w1 = None, w2 = None):
         if w1 == None:
             w1 = self.w1
         if w2 == None:
@@ -164,7 +166,7 @@ class TLP:
         #print 'eval of _tlp:' + str((datetime.now()-t0))
         return y
         
-    def _check_inputs(self, x):
+    def check_inputs(self, x):
         if type(x) != np.array:
             x = np.array(x)
         if len(x.shape) != 2:
@@ -175,14 +177,15 @@ class TLP:
     
     # forward propagation
     def forward(self, x):
-        x = self._check_inputs(x)
-        # add an additional input for the bias
-        x = np.append(np.ones([x.shape[0],1]),x,1)
-        yn = self._tlp(x)
+        x = self.check_inputs(x)
+        x = self.prepare_inputs(x)
+        yn = self._forward(x)
         return yn.T
         
-    def backward(self, x, dk, w2):
+    def backward(self, x, dk, w1 = None, w2 = None):
         """backward propagate the errors given by dk"""
+        if w2 == None:
+            w2 = self.w2
         dj = (1 - self.z[1:]**2) * np.dot(w2.T[1:,:], dk)
         #t0=datetime.now()
         g1 = (dj[:,:,np.newaxis]*x[np.newaxis,:,:]).transpose(1,0,2)
@@ -191,7 +194,7 @@ class TLP:
 
     # train the network via fixed step gradient descent back-propagation
     #def train(self, x, t, eta, nt, batch = False):
-        #x = self._check_inputs(x)
+        #x = self.check_inputs(x)
         #if type(t) != np.array:
             #t = np.array(t)
         ## add an additional input for the biases
@@ -233,6 +236,31 @@ class TLP:
                     #print self.w2
                 #self.E.append(E)
         #print 'residual error: ' + str(E)
+        
+    def reshape_weights(self, w):
+        if len(w.shape) == 3:
+            return w.reshape([w.shape[0], w.shape[1]*w.shape[2]])
+        else:
+            return w.flatten()
+        
+    def unpack_weights(self, w):
+        w1 = w[:self.Nw1].reshape([self.w1.shape[0],self.w1.shape[1]])
+        w2 = w[self.Nw1:].reshape([self.w2.shape[0],self.w2.shape[1]])
+        return w1, w2
+    
+    def pack_weights(self, w1, w2):
+        return np.append(self.reshape_weights(w1), self.reshape_weights(w2), axis = 1)
+    
+    def get_weights(self):
+        return self.w1, self.w2
+    
+    def set_weights(self, w1, w2):
+        self.w1 = w1
+        self.w2 = w2
+        
+    def prepare_inputs(self, x):
+        """add an additional input for the biases"""
+        return np.append(np.ones([x.shape[0],1]),x,1)
     
     def train_BFGS(self, x, t, gtol = 1e-2, Nmax = 1000, constrained = False,
                                  callback = None):
@@ -244,10 +272,9 @@ class TLP:
         # objective function to be minimized, takes a weight vector and returns an error measure
         def f(w, x, t):
             #t0=datetime.now()
-            w1 = w[:self.Nw1].reshape([self.w1.shape[0],self.w1.shape[1]])
-            w2 = w[self.Nw1:].reshape([self.w2.shape[0],self.w2.shape[1]])
-            y = self._tlp(x, w1, w2)
-            E = np.sum(self.En(y, t, w1, w2))
+            weights = self.unpack_weights(w)
+            y = self._forward(x, *weights)
+            E = np.sum(self.En(y, t, *weights))
             self.E.append(E)
             # store current network output for internal use
             self._y = y
@@ -257,11 +284,10 @@ class TLP:
         # gradient of f
         def df(w, x, t):
             #t0=datetime.now()
-            w1 = w[:self.Nw1].reshape([self.w1.shape[0],self.w1.shape[1]])
-            w2 = w[self.Nw1:].reshape([self.w2.shape[0],self.w2.shape[1]])
-            y = self._tlp(x, w1, w2)
-            dEnw1, dEnw2 = self.dEn(x, y, t, w1, w2)
-            g = np.append(np.sum(_reshape_w(dEnw1), 0), np.sum(_reshape_w(dEnw2), 0))
+            weights = self.unpack_weights(w)
+            y = self._forward(x, *weights)
+            dEnw = self.pack_weights(*self.dEn(x, y, t, *weights))
+            g = np.sum(dEnw, 0)
             #print 'eval of df:' + str((datetime.now()-t0))
             return g
             
@@ -275,19 +301,14 @@ class TLP:
             
         if callback == None: callback = iter_status
         
-        def _reshape_w(w):
-            if len(w.shape) == 3:
-                return w.reshape([w.shape[0], w.shape[1]*w.shape[2]])
-            else:
-                return w.flatten()
         t0=datetime.now()
-        x = self._check_inputs(x)
+        x = self.check_inputs(x)
         if type(t) != np.array:
             t = np.array(t)
-        # add an additional input for the biases
-        x = np.append(np.ones([x.shape[0],1]),x,1)
         
-        w = np.append(_reshape_w(self.w1), _reshape_w(self.w2))
+        x = self.prepare_inputs(x)
+        
+        w = self.pack_weights(*self.get_weights())
         if not constrained:
             self._iteration_no = 0
             self._t0 = datetime.now()
@@ -306,7 +327,6 @@ class TLP:
             w_new = tmp['x']
             print tmp['reason']
         #w_new = leastsq(f, w, (x, t), df)
-        self.w1 = w_new[:self.Nw1].reshape([self.w1.shape[0],self.w1.shape[1]])
-        self.w2 = w_new[self.Nw1:].reshape([self.w2.shape[0],self.w2.shape[1]])
+        self.set_weights(*self.unpack_weights(w_new))
         
         print 'Training complete, took ' + str(datetime.now()-t0) + 's'

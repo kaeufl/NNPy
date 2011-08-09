@@ -19,7 +19,7 @@ T = 1/(2*np.pi) * np.exp(-1.0/(2*np.pi*0.05)**2 * (X**2 + Y**2))
 #T2 = 1/(2*np.pi) * np.exp(-1.0/(2*np.pi*0.05)**2 * (x2[0]**2 + x2[1]**2))
 
 x = np.reshape(np.array([X,Y]),[2, N]).T
-t = np.reshape(T, [N, 1])
+t = np.reshape(T, [N, 1]).T
 
 #tlp.train(x, t, 0.003, 1000, True)
 #tlp.train(x, t, 0.00055, 1000, True)

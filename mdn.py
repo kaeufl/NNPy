@@ -121,7 +121,7 @@ class MDN(TLP):
     
     # back-propagate the dks
     #t0=datetime.now()
-    dEnw1, dEnw2 = self.backward(x, dk, w2)
+    dEnw1, dEnw2 = self.backward(x, dk, None, w2)
     #print 'eval of dE_mdn:' + str((datetime.now()-t0))
     #dj = (1 - self.z[1:]**2) * np.dot(w2[:,1:].T, dk)
     # evaluate derivatives with respect to the weights
@@ -132,10 +132,10 @@ class MDN(TLP):
   def HE_mdn(self):
     pass
     
-  def _tlp(self, x, w1 = None, w2 = None):
+  def _forward(self, x, w1 = None, w2 = None):
     # perform forward propagation    
     #t0=datetime.now()
-    y = TLP._tlp(self, x, w1, w2)
+    y = TLP._forward(self, x, w1, w2)
     
     #self.count_fwd = self.count_fwd + 1
     
