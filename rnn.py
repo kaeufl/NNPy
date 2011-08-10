@@ -92,12 +92,12 @@ class RNN(TLP):
         self.dj = np.zeros([x.shape[0], T, self.H+1])
         for t in range(T-1,-1,-1):
             if t < T-1:
-                DJ = self.dj[:, t+1, 1:, None]
+                DJ = self.dj[:, t+1, 1:]
             else:
-                DJ = np.zeros([x.shape[0], 1, self.H+1])
+                DJ = np.zeros([x.shape[0], self.H])
             self.dj[:, t, :] = self.dg(ga = self.z[:, t, :]) * (\
                     np.sum(w2[None, :, :] * dk[:,t,:, None], axis = 1) +\
-                    np.append(np.zeros([x.shape[0], 1]), np.sum(DJ * wh.T[None, :, :], axis = 2), axis = 1)
+                    np.append(np.zeros([x.shape[0], 1]), np.sum(DJ[:,None] * wh.T[None, :, :], axis = 2), axis = 1)
                 )
         
         #t0=datetime.now()

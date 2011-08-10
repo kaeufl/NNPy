@@ -30,8 +30,6 @@ class TLP:
         self.z = np.zeros(self.H+1) # hidden unit activations + bias
         
         # performance information
-        self.Dw1 = []
-        self.Dw2 = []
         self.E = []
     
     def init_weights(self, alpha1, alpha2):
