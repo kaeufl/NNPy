@@ -190,50 +190,50 @@ class TLP:
         g2 = (dk[:,:,np.newaxis]*self.z.T[np.newaxis,:,:]).transpose(1,0,2)
         return g1, g2
 
-    # train the network via fixed step gradient descent back-propagation
-    #def train(self, x, t, eta, nt, batch = False):
-        #x = self.check_inputs(x)
-        #if type(t) != np.array:
-            #t = np.array(t)
-        ## add an additional input for the biases
-        #x = np.append(np.tile([1],(x.shape[0],1)),x,1)
-        
-        #for it in range(nt):
-                #print "epoch: " + str(it)
-                #dEw1 = 0
-                #dEw2 = 0
-                #E = 0
-                #y = self._tlp(x)
-                #for xi in range(x.shape[0]):
-                    ## calculate activations for current sample
-                    ##y = self._tlp(x[xi])
-                    ## calculate derivatives
-                    #dEnw1, dEnw2 = self.dEn(x[xi], y[:,xi], t[xi])
-                    #dEw1 = dEw1 + dEnw1
-                    #dEw2 = dEw2 + dEnw2
-                    #E = E + self.En(y[:,xi], t[xi])
-                    ## perform weight updates
-                    #if not batch: # on-line learning
-                        #Dw1 = - eta * dEnw1
-                        #Dw2 = - eta * dEnw2
-                        #self.w1 = self.w1 + Dw1
-                        #self.w2 = self.w2 + Dw2
-                #if batch:
-                        #Dw1 = - eta * dEw1
-                        #Dw2 = - eta * dEw2                        
-                        #self.w1 = self.w1 + Dw1
-                        #self.w2 = self.w2 + Dw2
-                ## keep \Delta ws and E to monitor convergence
-                #self.Dw1.append(np.abs(np.sum(dEw1)));
-                #self.Dw2.append(np.abs(np.sum(dEw2)));
-                #print 'E = ' + str(E)
-                #if self.debug_output:
-                    #print '1st layer weights:'
-                    #print self.w1
-                    #print '2nd layer weights:'
-                    #print self.w2
-                #self.E.append(E)
-        #print 'residual error: ' + str(E)
+#    # train the network via fixed step gradient descent back-propagation
+#    def train_fsgd(self, x, t, eta, nt, batch = False):
+#        x = self.check_inputs(x)
+#        if type(t) != np.array:
+#            t = np.array(t)
+#        # add an additional input for the biases
+#        x = self.prepare_inputs(x)
+#        
+#        for it in range(nt):
+#            print "epoch: " + str(it)
+#            dEw1 = 0
+#            dEw2 = 0
+#            E = 0
+#            y = self._tlp(x)
+#            for xi in range(x.shape[0]):
+#                # calculate activations for current sample
+#                #y = self._tlp(x[xi])
+#                # calculate derivatives
+#                dEnw1, dEnw2 = self.dEn(x[xi], y[:,xi], t[xi])
+#                dEw1 = dEw1 + dEnw1
+#                dEw2 = dEw2 + dEnw2
+#                E = E + self.En(y[:,xi], t[xi])
+#                # perform weight updates
+#                if not batch: # on-line learning
+#                    Dw1 = - eta * dEnw1
+#                    Dw2 = - eta * dEnw2
+#                    self.w1 = self.w1 + Dw1
+#                    self.w2 = self.w2 + Dw2
+#            if batch:
+#                    Dw1 = - eta * dEw1
+#                    Dw2 = - eta * dEw2                        
+#                    self.w1 = self.w1 + Dw1
+#                    self.w2 = self.w2 + Dw2
+#            # keep \Delta ws and E to monitor convergence
+#            self.Dw1.append(np.abs(np.sum(dEw1)));
+#            self.Dw2.append(np.abs(np.sum(dEw2)));
+#            print 'E = ' + str(E)
+#            if self.debug_output:
+#                print '1st layer weights:'
+#                print self.w1
+#                print '2nd layer weights:'
+#                print self.w2
+#            self.E.append(E)
+#        print 'residual error: ' + str(E)
         
     def reshape_weights(self, w):
         if len(w.shape) == 3:
